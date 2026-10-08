@@ -1,0 +1,6 @@
+namespace RoundSystem;
+
+class Round
+{
+
+}

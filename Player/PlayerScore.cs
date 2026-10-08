@@ -1,0 +1,6 @@
+namespace PlayerSystem;
+
+class PlayerScore
+{
+
+}

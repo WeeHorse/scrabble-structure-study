@@ -1,0 +1,6 @@
+namespace BoardSystem;
+
+class SquareScore
+{
+
+}

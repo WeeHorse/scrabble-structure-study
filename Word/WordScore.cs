@@ -1,0 +1,6 @@
+namespace WordSystem;
+
+class WordScore
+{
+
+}

@@ -1,0 +1,6 @@
+namespace TileSystem;
+
+class TileScore
+{
+
+}
