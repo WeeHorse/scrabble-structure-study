@@ -7,10 +7,9 @@ using UISystem;
 
 var board = new Board();
 var bag = new TileBag();
-var dictionary = DictionarySystem.Dictionary.LoadSwedish(
-  args.Contains("--strict") ? DictionarySystem.WordRules.Strict : DictionarySystem.WordRules.Lenient);
-
 using var ui = new ConsoleUI();
+
+var dictionary = DictionarySystem.Dictionary.LoadSwedish(ui.AskWordRules());
 
 var players = ui.AskPlayerNames().Select(name => new Player(name)).ToList();
 

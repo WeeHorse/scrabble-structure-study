@@ -7,7 +7,7 @@ Source: Språkbanken Text, SALDO's morphology (2017), CC BY 4.0,
 https://spraakbanken.gu.se/en/resources/saldo (DOI 10.23695/agcm-ny22).
 
 Output: {"lemma": ["inflected form", ...]}. The key is the base form (strict
-rules); the key plus its list gives every playable form (lenient rules).
+rules); the key plus its list gives every playable form (loose rules).
 """
 import json
 import re

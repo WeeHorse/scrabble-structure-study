@@ -2,11 +2,11 @@ using Newtonsoft.Json;
 
 namespace DictionarySystem;
 
-// Strict: only base forms (the keys) are valid. Lenient: inflected forms (the values) are valid too.
+// Strict: only base forms (the keys) are valid. Loose: inflected forms (the values) are valid too.
 enum WordRules
 {
   Strict,
-  Lenient
+  Loose
 }
 
 // set of valid words, used to validate a Word
@@ -14,7 +14,7 @@ class Dictionary
 {
   private readonly HashSet<string> words = [];
 
-  public Dictionary(string path, WordRules rules = WordRules.Lenient)
+  public Dictionary(string path, WordRules rules = WordRules.Loose)
   {
     var wordlist = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(File.ReadAllText(path))
       ?? new Dictionary<string, List<string>>();
@@ -23,13 +23,13 @@ class Dictionary
     {
       words.Add(baseForm.ToLowerInvariant());
 
-      if (rules == WordRules.Lenient)
+      if (rules == WordRules.Loose)
         foreach (var inflection in inflections)
           words.Add(inflection.ToLowerInvariant());
     }
   }
 
-  public static Dictionary LoadSwedish(WordRules rules = WordRules.Lenient) =>
+  public static Dictionary LoadSwedish(WordRules rules = WordRules.Loose) =>
     new(Path.Combine(AppContext.BaseDirectory, "wordlists", "swedish.json"), rules);
 
   public int Count => words.Count;

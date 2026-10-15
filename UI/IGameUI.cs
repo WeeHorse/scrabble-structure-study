@@ -1,3 +1,4 @@
+using DictionarySystem;
 using TileSystem;
 
 namespace UISystem;
@@ -6,6 +7,8 @@ namespace UISystem;
 // what the player wants to do; checking whether it is allowed is up to the game.
 interface IGameUI
 {
+  WordRules AskWordRules();
+
   IReadOnlyList<string> AskPlayerNames();
 
   void ShowScoreboard(IReadOnlyList<PlayerView> players, int tilesInBag);

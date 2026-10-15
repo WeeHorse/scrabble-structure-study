@@ -10,9 +10,10 @@ Most classes are currently empty skeletons with comments describing their intend
 - [Newtonsoft.Json](https://www.newtonsoft.com/json) 13.0.4, used to read the word list
 
 ```sh
-dotnet run             # lenient: inflected forms are valid words
-dotnet run -- --strict  # strict: base forms only
+dotnet run
 ```
+
+The game first asks for the word rules: loose (inflected forms are valid words) or strict (base forms only).
 
 `Program.cs` runs a hot-seat game in the console (2-4 players). Moves are checked (single line, no gaps, connected, star covered first, words in the word list) and scored with the standard premium squares and the 50-point bonus for using all 7 tiles.
 
@@ -57,7 +58,7 @@ A square's `ScoreType` modifies a tile's value, tile values add up to a word sco
 }
 ```
 
-The keys are the strict rule set; keys plus values are the lenient one (`WordRules` in [Dictionary/Dictionary.cs](Dictionary/Dictionary.cs)). The file holds about 100,000 base forms and 410,000 playable words, generated from SALDO's morphology (CC BY 4.0) by [tools/build_wordlist.py](tools/build_wordlist.py). See [wordlists/README.md](wordlists/README.md) for the filtering and the source.
+The keys are the strict rule set; keys plus values are the loose one (`WordRules` in [Dictionary/Dictionary.cs](Dictionary/Dictionary.cs)). The file holds about 100,000 base forms and 410,000 playable words, generated from SALDO's morphology (CC BY 4.0) by [tools/build_wordlist.py](tools/build_wordlist.py). See [wordlists/README.md](wordlists/README.md) for the filtering and the source.
 
 ## Status
 

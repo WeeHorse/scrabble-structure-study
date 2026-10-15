@@ -1,4 +1,5 @@
 using System.Text;
+using DictionarySystem;
 using ScoreSystem;
 using TileSystem;
 
@@ -44,6 +45,27 @@ class ConsoleUI : IGameUI, IDisposable
   {
     Console.ResetColor();
     Console.CursorVisible = true;
+  }
+
+  public WordRules AskWordRules()
+  {
+    Console.Clear();
+    Console.WriteLine("SCRABBLE");
+    Console.WriteLine();
+    Console.WriteLine("Word rules:");
+    Console.WriteLine("  1. Loose  - inflected forms are allowed (bil, bilar, bilen)");
+    Console.WriteLine("  2. Strict - base forms only (bil)");
+    Console.WriteLine();
+
+    while (true)
+    {
+      Console.Write("Choose 1 or 2: ");
+      switch (Console.ReadLine()?.Trim().ToLowerInvariant())
+      {
+        case "1" or "loose": return WordRules.Loose;
+        case "2" or "strict": return WordRules.Strict;
+      }
+    }
   }
 
   public IReadOnlyList<string> AskPlayerNames()
