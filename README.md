@@ -13,7 +13,7 @@ Most classes are currently empty skeletons with comments describing their intend
 dotnet run
 ```
 
-`Program.cs` is currently only a "Hello, World!" placeholder.
+`Program.cs` runs a hot-seat game in the console (2-4 players). Moves are not yet validated or scored.
 
 ## Structure
 
@@ -21,13 +21,14 @@ Each domain concept has its own folder and its own namespace, named `<Concept>Sy
 
 | Folder | Namespace | Classes | Intended role |
 | --- | --- | --- | --- |
-| [Board/](Board) | `BoardSystem` | `Board`, `Square`, `SquareScore` | The grid of squares. `Board` holds a `List<List<Square>>`, currently a 3×3 prototype with double-letter and triple-word squares. Each `Square` has a `ScoreType`. |
+| [Board/](Board) | `BoardSystem` | `Board`, `Square`, `SquareScore` | The grid of squares. `Board` holds a `Square[,]`, the standard 15×15 layout. Each `Square` has a `ScoreType`, an `IsStart` flag (the centre star, also a double word) and an optional `Tile`. |
 | [Tile/](Tile) | `TileSystem` | `Tile`, `TileBag`, `TileScore` | A tile (letter and point value) and the bag of tiles left to draw from. |
 | [Player/](Player) | `PlayerSystem` | `Player`, `PlayerRack`, `PlayerScore` | A player (name, rack, score). The rack holds at most 7 tiles and is refilled to 7 after each turn. |
 | [Word/](Word) | `WordSystem` | `Word`, `WordScore` | The tiles played in a turn, with their positions on the board. |
 | [Round/](Round) | `RoundSystem` | `Round`, `Turn`, `RoundScore` | A round of play and the individual turns (moves) within it. |
 | [Score/](Score) | `ScoreSystem` | `Score`, `ScoreType` | Shared scoring types. `ScoreType` is an enum: `Normal`, `DoubleLetter`, `TripleLetter`, `DoubleWord`, `TripleWord`. |
 | [Dictionary/](Dictionary) | `DictionarySystem` | `Dictionary` | The set of valid words, used to validate a `Word`. |
+| [UI/](UI) | `UISystem` | `IGameUI`, `ConsoleUI`, `SquareView`, `TurnAction` | The console front end. It renders a `SquareView[,]` map (multipliers, start square, tiles) and returns a `TurnAction` (place, exchange, pass, quit). It knows nothing about game rules. |
 | [wordlists/](wordlists) | n/a | `swedish.json` | Word data: base forms mapped to their inflections. |
 
 ### Scoring hierarchy

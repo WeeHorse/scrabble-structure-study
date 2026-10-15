@@ -1,15 +1,19 @@
 namespace BoardSystem;
 
 using ScoreSystem;
+using TileSystem;
 
 class Square
 {
 
-  private ScoreType ScoreType;
+  public ScoreType ScoreType { get; }
+  public bool IsStart { get; }
+  public Tile? Tile { get; set; }
 
-  public Square(ScoreType scoreType = ScoreType.Normal)
+  public Square(ScoreType scoreType = ScoreType.Normal, bool isStart = false)
   {
     ScoreType = scoreType;
+    IsStart = isStart;
   }
 
 }

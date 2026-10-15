@@ -2,5 +2,12 @@ namespace PlayerSystem;
 
 class Player
 {
-  // name, Rack, Score
+  public string Name { get; }
+  public PlayerRack Rack { get; } = new();
+  public int Score { get; set; }
+
+  public Player(string name)
+  {
+    Name = name;
+  }
 }
