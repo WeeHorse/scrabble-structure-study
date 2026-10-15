@@ -10,10 +10,11 @@ Most classes are currently empty skeletons with comments describing their intend
 - [Newtonsoft.Json](https://www.newtonsoft.com/json) 13.0.4, used to read the word list
 
 ```sh
-dotnet run
+dotnet run             # lenient: inflected forms are valid words
+dotnet run -- --strict  # strict: base forms only
 ```
 
-`Program.cs` runs a hot-seat game in the console (2-4 players). Moves are not yet validated or scored.
+`Program.cs` runs a hot-seat game in the console (2-4 players). Moves are checked (single line, no gaps, connected, star covered first, words in the word list) and scored with the standard premium squares and the 50-point bonus for using all 7 tiles.
 
 ## Structure
 
@@ -52,20 +53,18 @@ A square's `ScoreType` modifies a tile's value, tile values add up to a word sco
 
 ```json
 {
-  "cykel": ["cykeln", "cyklar", "cyklarna", "cykels"],
-  "bil": ["bilen", "bilar", "bilarna", "bils"]
+  "bil": ["bilar", "bilarna", "bilen"]
 }
 ```
 
-`Dictionary` deserializes this shape into a `Dictionary<string, List<string>>`. The loader is not finished: `ReadWordList` currently parses a hard-coded JSON string rather than the file, and its result is discarded by the constructor.
+The keys are the strict rule set; keys plus values are the lenient one (`WordRules` in [Dictionary/Dictionary.cs](Dictionary/Dictionary.cs)). The file holds about 100,000 base forms and 410,000 playable words, generated from SALDO's morphology (CC BY 4.0) by [tools/build_wordlist.py](tools/build_wordlist.py). See [wordlists/README.md](wordlists/README.md) for the filtering and the source.
 
 ## Status
 
 | Area | State |
 | --- | --- |
-| `ScoreType` enum | Done |
-| `Board` / `Square` | Prototype (3×3 grid, `Square` stores its `ScoreType`) |
-| `Dictionary` | Partial (parses an inline sample, does not read `swedish.json`) |
-| `Tile`, `TileBag`, `Player`, `PlayerRack`, `Word`, `Round`, `Turn` | Empty, with intent in comments |
-| All `*Score` classes, `Score` | Empty |
-| `Program.cs` | Placeholder |
+| Board, squares, premium layout | Done (standard 15×15) |
+| Tiles, bag, racks, players | Done (Swedish distribution) |
+| Placement rules, word finding, scoring, dictionary | Done; no challenges, no 6-scoreless-turns end rule |
+| Console UI and hot-seat game loop | Done |
+| `Round`, `RoundScore`, `PlayerScore` | Empty |
