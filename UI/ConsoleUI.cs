@@ -92,6 +92,25 @@ class ConsoleUI : IGameUI, IDisposable
     Console.ReadKey(true);
   }
 
+  public void AwaitPlayer(PlayerView next)
+  {
+    Console.ResetColor();
+    Console.Clear();
+    Console.WriteLine("SCRABBLE");
+    Console.WriteLine();
+
+    if (message != null)
+    {
+      Console.ForegroundColor = messageIsError ? ConsoleColor.Red : ConsoleColor.Yellow;
+      Console.WriteLine(message);
+      Console.ResetColor();
+      Console.WriteLine();
+    }
+
+    Console.WriteLine($"{next.Name}, it is your turn. Press any key when you are ready.");
+    Console.ReadKey(true);
+  }
+
   public TurnAction PromptTurn(PlayerView currentPlayer, IReadOnlyList<Tile> playerRack, SquareView[,] board)
   {
     current = currentPlayer;

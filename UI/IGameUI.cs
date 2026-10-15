@@ -10,6 +10,9 @@ interface IGameUI
 
   void ShowScoreboard(IReadOnlyList<PlayerView> players, int tilesInBag);
 
+  // Hides the board and racks until the next player is at the keyboard.
+  void AwaitPlayer(PlayerView next);
+
   // Lets the current player build a move on the board. Blocks until they
   // place, exchange, pass or quit.
   TurnAction PromptTurn(PlayerView current, IReadOnlyList<Tile> rack, SquareView[,] map);

@@ -1,6 +1,7 @@
 using BoardSystem;
 using PlayerSystem;
 using RoundSystem;
+using ScoreSystem;
 using TileSystem;
 using UISystem;
 
@@ -12,20 +13,36 @@ var dictionary = DictionarySystem.Dictionary.LoadSwedish(
 using var ui = new ConsoleUI();
 
 var players = ui.AskPlayerNames().Select(name => new Player(name)).ToList();
+
+var (first, drawDescription) = TurnOrder.DrawForFirst(bag, players);
+int firstIndex = players.IndexOf(first);
+players = players.Skip(firstIndex).Concat(players.Take(firstIndex)).ToList();
+ui.ShowMessage($"Draw for first turn: {drawDescription}");
+
 foreach (var player in players)
   player.Rack.Refill(bag);
 
 int turn = 0;
-int consecutivePasses = 0;
+int scorelessTurns = 0;
+bool quit = false;
+bool handover = true;
 
 while (true)
 {
   var player = players[turn % players.Count];
 
+  if (handover)
+    ui.AwaitPlayer(new PlayerView(player.Name, player.Score));
+  handover = false;
+
   ui.ShowScoreboard(players.Select(p => new PlayerView(p.Name, p.Score)).ToList(), bag.Count);
   var action = ui.PromptTurn(new PlayerView(player.Name, player.Score), player.Rack.Tiles, SquareView.MapOf(board));
 
-  if (action is Quit) break;
+  if (action is Quit)
+  {
+    quit = true;
+    break;
+  }
 
   switch (action)
   {
@@ -45,7 +62,7 @@ while (true)
       player.Rack.Refill(bag);
       player.Score += result.Points;
       ui.ShowMessage($"{player.Name} scored {result.Points}: {string.Join(", ", result.Words.Select(w => w.Text))}");
-      consecutivePasses = 0;
+      scorelessTurns = 0;
       break;
 
     case ExchangeTiles exchange:
@@ -58,28 +75,31 @@ while (true)
         player.Rack.Remove(tile);
       player.Rack.Refill(bag);
       bag.Return(exchange.Tiles);
-      consecutivePasses++;
+      scorelessTurns++;
       break;
 
     case Pass:
-      consecutivePasses++;
+      scorelessTurns++;
       break;
   }
 
-  // the game ends when the bag and a rack are empty, or everyone passes twice in a row
+  // the game ends when the bag and a rack are empty, or after six scoreless turns in a row
   if (bag.Count == 0 && player.Rack.Tiles.Count == 0) break;
-  if (consecutivePasses >= players.Count * 2) break;
+  if (scorelessTurns >= Score.ScorelessTurnLimit) break;
 
   turn++;
+  handover = true;
 }
 
 // tiles left on a rack count against its owner; whoever went out collects them
-foreach (var p in players)
-{
-  int leftover = p.Rack.Tiles.Sum(TileScore.Value);
-  p.Score -= leftover;
-  if (p.Rack.Tiles.Count == 0)
-    p.Score += players.Sum(other => other.Rack.Tiles.Sum(TileScore.Value));
-}
+// (a game that was quit is not settled)
+if (!quit)
+  foreach (var p in players)
+  {
+    int leftover = p.Rack.Tiles.Sum(TileScore.Value);
+    p.Score -= leftover;
+    if (p.Rack.Tiles.Count == 0)
+      p.Score += players.Sum(other => other.Rack.Tiles.Sum(TileScore.Value));
+  }
 
 ui.ShowGameOver(players.OrderByDescending(p => p.Score).Select(p => new PlayerView(p.Name, p.Score)).ToList());

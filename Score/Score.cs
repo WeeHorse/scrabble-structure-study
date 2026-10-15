@@ -3,6 +3,9 @@ namespace ScoreSystem;
 class Score
 {
   public const int BingoBonus = 50;
+
+  // the game ends after this many scoreless turns (pass or exchange) in a row
+  public const int ScorelessTurnLimit = 6;
 }
 
 
