@@ -21,41 +21,43 @@ static class EndWord
     return null;
   }
 
-  // The candidate with the most letters found in the pool (a letter counts as
-  // many times as it occurs in the pool). Fewer left-over letters win a tie;
-  // remaining ties are decided at random.
+  // The candidate that the suggestions explain best *together*. For each
+  // candidate, "matched" is how many of its letters are found in the pooled
+  // letters of all suggestions (a letter counts as many times as it occurs),
+  // and "best single" is how many of its letters the best single suggestion
+  // covers alone. Candidates are ranked by matched - best single (the letters
+  // only the combination explains, so a word copied from one player scores 0),
+  // then by matched, then by fewest left-over letters. Remaining ties are
+  // decided at random.
   public static string Pick(DictionarySystem.Dictionary dictionary, IEnumerable<string> suggestions, Random? random = null)
   {
     random ??= Random.Shared;
 
-    var pool = suggestions
-      .SelectMany(s => s.ToLowerInvariant())
-      .GroupBy(c => c)
-      .ToDictionary(g => g.Key, g => g.Count());
+    var perPlayer = suggestions.Select(Count).ToList();
+    var pool = new Dictionary<char, int>();
+    foreach (var counts in perPlayer)
+      foreach (var (letter, n) in counts)
+        pool[letter] = pool.GetValueOrDefault(letter) + n;
 
     string best = "";
-    int bestMatched = -1, bestUnmatched = 0, ties = 0;
+    (int Combined, int Matched, int Fewer) bestScore = (-1, -1, 0);
+    int ties = 0;
 
     foreach (var word in dictionary.Words)
     {
       if (word.Length is < MinLength or > MaxLength) continue;
 
-      var used = new Dictionary<char, int>();
-      int matched = 0;
-      foreach (char c in word)
-        if (pool.TryGetValue(c, out int available) && used.GetValueOrDefault(c) < available)
-        {
-          used[c] = used.GetValueOrDefault(c) + 1;
-          matched++;
-        }
+      var counts = Count(word);
+      int matched = Overlap(counts, pool);
+      int bestSingle = perPlayer.Max(p => Overlap(counts, p));
+      var score = (matched - bestSingle, matched, -(word.Length - matched));
 
-      int unmatched = word.Length - matched;
-
-      if (matched > bestMatched || (matched == bestMatched && unmatched < bestUnmatched))
+      int comparison = score.CompareTo(bestScore);
+      if (comparison > 0)
       {
-        (best, bestMatched, bestUnmatched, ties) = (word, matched, unmatched, 1);
+        (best, bestScore, ties) = (word, score, 1);
       }
-      else if (matched == bestMatched && unmatched == bestUnmatched && random.Next(++ties) == 0)
+      else if (comparison == 0 && random.Next(++ties) == 0)
       {
         best = word;
       }
@@ -63,4 +65,11 @@ static class EndWord
 
     return best;
   }
+
+  private static Dictionary<char, int> Count(string word) =>
+    word.ToLowerInvariant().GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
+
+  // number of letters two words have in common, counting repeats
+  private static int Overlap(Dictionary<char, int> a, Dictionary<char, int> b) =>
+    a.Sum(letter => Math.Min(letter.Value, b.GetValueOrDefault(letter.Key)));
 }
