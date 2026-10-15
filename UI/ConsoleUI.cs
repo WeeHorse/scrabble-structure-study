@@ -21,6 +21,8 @@ class ConsoleUI : IGameUI, IDisposable
   // shown on every redraw
   private IReadOnlyList<PlayerView> players = [];
   private int tilesInBag;
+  private string? endWord;
+  private int endWordBonus;
   private string? message;
   private bool messageIsError;
 
@@ -68,6 +70,61 @@ class ConsoleUI : IGameUI, IDisposable
     }
   }
 
+  public bool AskEndWordOption()
+  {
+    Console.Clear();
+    Console.WriteLine("SCRABBLE");
+    Console.WriteLine();
+    Console.WriteLine("End word:");
+    Console.WriteLine("  Before the game every player secretly suggests a word of 5-7 letters.");
+    Console.WriteLine("  The word list word that best matches all suggested letters becomes the end word.");
+    Console.WriteLine("  Whoever plays it ends the game, and gets a bonus.");
+    Console.WriteLine();
+
+    while (true)
+    {
+      Console.Write("Play with an end word? (Y/N): ");
+      switch (Console.ReadLine()?.Trim().ToLowerInvariant())
+      {
+        case "y" or "yes": return true;
+        case "n" or "no": return false;
+      }
+    }
+  }
+
+  public string PromptEndWordSuggestion(PlayerView player, IReadOnlyList<Tile> playerRack, string? error)
+  {
+    current = player;
+    rack = playerRack;
+    pending.Clear();
+    exchangeSelection = null;
+
+    Console.ResetColor();
+    Console.Clear();
+    Console.WriteLine("SCRABBLE - end word");
+    Console.WriteLine();
+    Console.WriteLine($"{player.Name}, suggest a word of 5-7 letters that would end the game early.");
+    Console.WriteLine("It does not have to be made from your tiles.");
+    Console.WriteLine();
+    DrawRack();
+    Console.WriteLine();
+
+    if (error != null)
+    {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine(error);
+      Console.ResetColor();
+    }
+
+    Console.CursorVisible = true;
+    Console.Write("Your word: ");
+    string word = Console.ReadLine()?.Trim() ?? "";
+    Console.CursorVisible = false;
+    return word;
+  }
+
+  public void ShowEndWord(string? word, int bonus) => (endWord, endWordBonus) = (word, bonus);
+
   public IReadOnlyList<string> AskPlayerNames()
   {
     Console.CursorVisible = true;
@@ -104,12 +161,17 @@ class ConsoleUI : IGameUI, IDisposable
 
   public void ShowError(string text) => (message, messageIsError) = (text, true);
 
-  public void ShowGameOver(IReadOnlyList<PlayerView> ranking)
+  public void ShowGameOver(IReadOnlyList<PlayerView> ranking, string? note = null)
   {
     Console.ResetColor();
     Console.Clear();
     Console.WriteLine("GAME OVER");
     Console.WriteLine();
+    if (note != null)
+    {
+      Console.WriteLine(note);
+      Console.WriteLine();
+    }
     for (int i = 0; i < ranking.Count; i++)
       Console.WriteLine($"{i + 1}. {ranking[i].Name,-20} {ranking[i].Score,5}");
     Console.WriteLine();
@@ -132,7 +194,7 @@ class ConsoleUI : IGameUI, IDisposable
       Console.WriteLine();
     }
 
-    Console.WriteLine($"{next.Name}, it is your turn. Press any key when you are ready.");
+    Console.WriteLine($"Pass the keyboard to {next.Name}. Press any key when you are ready.");
     Console.ReadKey(true);
   }
 
@@ -456,6 +518,9 @@ class ConsoleUI : IGameUI, IDisposable
     }
     Console.ResetColor();
     Console.WriteLine($"| Tiles in bag: {tilesInBag}");
+
+    if (endWord != null)
+      Console.WriteLine($"End word: {endWord.ToUpperInvariant()} (+{endWordBonus} to whoever plays it, and the game ends)");
   }
 
   private void DrawRack()

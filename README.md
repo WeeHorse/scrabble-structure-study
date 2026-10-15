@@ -13,7 +13,7 @@ Most classes are currently empty skeletons with comments describing their intend
 dotnet run
 ```
 
-The game first asks for the word rules: loose (inflected forms are valid words) or strict (base forms only).
+The game first asks for the word rules: loose (inflected forms are valid words) or strict (base forms only). It then asks whether to play with an end word: before the game every player secretly suggests a 5-7 letter word from the word list, the letters of all suggestions are pooled, and the word list word that matches the pool best (see [Round/EndWord.cs](Round/EndWord.cs)) becomes the end word. Whoever plays it gets a 50-point bonus and the game ends.
 
 `Program.cs` runs a hot-seat game in the console (2-4 players). Moves are checked (single line, no gaps, connected, star covered first, words in the word list) and scored with the standard premium squares and the 50-point bonus for using all 7 tiles.
 

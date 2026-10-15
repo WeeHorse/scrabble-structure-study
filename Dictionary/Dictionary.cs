@@ -34,5 +34,7 @@ class Dictionary
 
   public int Count => words.Count;
 
+  public IReadOnlyCollection<string> Words => words;
+
   public bool Contains(string word) => words.Contains(word.ToLowerInvariant());
 }

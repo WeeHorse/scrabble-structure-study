@@ -9,7 +9,15 @@ interface IGameUI
 {
   WordRules AskWordRules();
 
+  bool AskEndWordOption();
+
   IReadOnlyList<string> AskPlayerNames();
+
+  // One player's secret suggestion for the end word; the error (if any) is why the previous attempt was refused.
+  string PromptEndWordSuggestion(PlayerView player, IReadOnlyList<Tile> rack, string? error);
+
+  // Shows the end word on the scoreboard from now on (null hides it).
+  void ShowEndWord(string? word, int bonus);
 
   void ShowScoreboard(IReadOnlyList<PlayerView> players, int tilesInBag);
 
@@ -23,5 +31,5 @@ interface IGameUI
   void ShowMessage(string message);
   void ShowError(string message);
 
-  void ShowGameOver(IReadOnlyList<PlayerView> ranking);
+  void ShowGameOver(IReadOnlyList<PlayerView> ranking, string? note = null);
 }
