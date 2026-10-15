@@ -10,6 +10,9 @@ namespace UISystem;
 //   Ctrl+R takes back all, Enter plays, Ctrl+P passes, Ctrl+E exchanges, Esc quits.
 class ConsoleUI : IGameUI, IDisposable
 {
+  // every square and rack tile is drawn this many characters wide and two lines high
+  private const int CellWidth = 6;
+
   private const string Letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ";
 
   private record Pending(int X, int Y, Tile Tile, int RackIndex);
@@ -326,16 +329,17 @@ class ConsoleUI : IGameUI, IDisposable
 
     Console.Write("   ");
     for (int x = 0; x <= Board14; x++)
-      Console.Write($" {(char)('A' + x)} ");
+      Console.Write(Center(((char)('A' + x)).ToString(), CellWidth));
     Console.WriteLine();
 
     for (int y = 0; y <= Board14; y++)
-    {
-      Console.Write($"{y + 1,2} ");
-      for (int x = 0; x <= Board14; x++)
-        DrawSquare(x, y);
-      Console.WriteLine();
-    }
+      for (int line = 0; line < 2; line++)
+      {
+        Console.Write(line == 0 ? $"{y + 1,2} " : "   ");
+        for (int x = 0; x <= Board14; x++)
+          DrawSquare(x, y, line);
+        Console.WriteLine();
+      }
 
     Console.WriteLine();
     DrawScoreboard();
@@ -361,41 +365,48 @@ class ConsoleUI : IGameUI, IDisposable
     Console.ResetColor();
   }
 
-  private void DrawSquare(int x, int y)
+  // line 0 carries the content (letter and points, or the premium label), line 1 is just colour
+  private void DrawSquare(int x, int y, int line)
   {
     var square = map[y, x];
     var placed = pending.FirstOrDefault(p => p.X == x && p.Y == y);
     bool cursor = x == cursorX && y == cursorY && exchangeSelection == null;
 
     char? letter = placed?.Tile.Letter ?? square.Letter;
-    string text;
+    string content;
     ConsoleColor background, foreground;
 
     if (letter != null)
     {
-      text = $" {letter} ";
+      int points = placed?.Tile.Points ?? square.Points;
+      content = $"{letter}{Subscript(points)}";
       bool blank = placed?.Tile.IsBlank ?? square.IsBlank;
       background = placed != null ? ConsoleColor.Yellow : ConsoleColor.Gray;
       foreground = blank ? ConsoleColor.DarkBlue : ConsoleColor.Black;
     }
     else
     {
-      (text, background) = square switch
+      (content, background) = square switch
       {
-        { IsStart: true } => (" ★ ", ConsoleColor.Magenta),
-        { Score: ScoreType.TripleWord } => ("TW ", ConsoleColor.Red),
-        { Score: ScoreType.DoubleWord } => ("DW ", ConsoleColor.Magenta),
-        { Score: ScoreType.TripleLetter } => ("TL ", ConsoleColor.DarkBlue),
-        { Score: ScoreType.DoubleLetter } => ("DL ", ConsoleColor.DarkCyan),
-        _ => (" · ", ConsoleColor.DarkGreen)
+        { IsStart: true } => ("★", ConsoleColor.Magenta),
+        { Score: ScoreType.TripleWord } => ("TW", ConsoleColor.Red),
+        { Score: ScoreType.DoubleWord } => ("DW", ConsoleColor.Magenta),
+        { Score: ScoreType.TripleLetter } => ("TL", ConsoleColor.DarkBlue),
+        { Score: ScoreType.DoubleLetter } => ("DL", ConsoleColor.DarkCyan),
+        _ => ("·", ConsoleColor.DarkGreen)
       };
       foreground = ConsoleColor.White;
     }
 
+    string text = Center(line == 0 ? content : "", CellWidth);
+
     if (cursor)
     {
-      text = $"[{(letter?.ToString() ?? (horizontal ? "→" : "↓"))}]";
+      if (letter == null) content = horizontal ? "→" : "↓";
       foreground = letter != null ? foreground : ConsoleColor.White;
+      text = line == 0
+        ? "[" + Center(content, CellWidth - 2) + "]"
+        : "└" + new string(' ', CellWidth - 2) + "┘";
     }
 
     Console.BackgroundColor = background;
@@ -403,6 +414,15 @@ class ConsoleUI : IGameUI, IDisposable
     Console.Write(text);
     Console.ResetColor();
   }
+
+  private static string Center(string text, int width)
+  {
+    int left = Math.Max(0, (width - text.Length) / 2);
+    return (new string(' ', left) + text).PadRight(width);
+  }
+
+  private static string Subscript(int number) =>
+    string.Concat(number.ToString().Select(digit => "₀₁₂₃₄₅₆₇₈₉"[digit - '0']));
 
   private void DrawScoreboard()
   {
@@ -418,25 +438,28 @@ class ConsoleUI : IGameUI, IDisposable
 
   private void DrawRack()
   {
-    Console.Write("Rack: ");
-    for (int i = 0; i < rack.Count; i++)
+    for (int line = 0; line < 2; line++)
     {
-      bool used = pending.Any(p => p.RackIndex == i);
-      bool selected = exchangeSelection?.Contains(i) ?? false;
+      Console.Write(line == 0 ? "Rack: " : "      ");
+      for (int i = 0; i < rack.Count; i++)
+      {
+        bool used = pending.Any(p => p.RackIndex == i);
+        bool selected = exchangeSelection?.Contains(i) ?? false;
 
-      Console.BackgroundColor = used ? ConsoleColor.DarkGray : selected ? ConsoleColor.Cyan : ConsoleColor.Gray;
-      Console.ForegroundColor = ConsoleColor.Black;
-      Console.Write($" {rack[i].Letter}{rack[i].Points,-2}".PadRight(5));
-      Console.ResetColor();
-      Console.Write(" ");
+        Console.BackgroundColor = used ? ConsoleColor.DarkGray : selected ? ConsoleColor.Cyan : ConsoleColor.Gray;
+        Console.ForegroundColor = ConsoleColor.Black;
+        Console.Write(Center(line == 0 ? $"{rack[i].Letter}{Subscript(rack[i].Points)}" : "", CellWidth));
+        Console.ResetColor();
+        Console.Write(" ");
+      }
+      Console.WriteLine();
     }
-    Console.WriteLine();
 
     if (exchangeSelection != null)
     {
       Console.Write("      ");
       for (int i = 0; i < rack.Count; i++)
-        Console.Write($"  {i + 1}   ");
+        Console.Write(Center((i + 1).ToString(), CellWidth) + " ");
       Console.WriteLine();
     }
   }
