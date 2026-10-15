@@ -31,11 +31,18 @@ class Board
     {
       string row = Template[y < Template.Length ? y : Size - 1 - y];
       for (int x = 0; x < Size; x++)
+      {
         squares[y, x] = Create(row[x]);
+        if (squares[y, x].IsStart) Start = (x, y);
+      }
     }
   }
 
   public Square this[int x, int y] => squares[y, x];
+
+  public (int X, int Y) Start { get; }
+
+  public bool HasTiles => squares.Cast<Square>().Any(s => s.Tile != null);
 
   private static Square Create(char c) => c switch
   {

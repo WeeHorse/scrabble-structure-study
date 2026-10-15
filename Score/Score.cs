@@ -1,7 +1,8 @@
 namespace ScoreSystem;
 
-class Score{
-  
+class Score
+{
+  public const int BingoBonus = 50;
 }
 
 
