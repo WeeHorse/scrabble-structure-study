@@ -25,7 +25,7 @@ foreach (var player in players)
 string? endWord = null;
 if (useEndWord)
 {
-  var suggestions = new List<string>();
+  var suggestions = new List<(string Player, string Word)>();
   foreach (var player in players)
   {
     var view = new PlayerView(player.Name, player.Score);
@@ -39,14 +39,14 @@ if (useEndWord)
       error = EndWord.Validate(dictionary, suggestion);
     } while (error != null);
 
-    suggestions.Add(suggestion);
+    suggestions.Add((player.Name, suggestion));
   }
 
-  endWord = EndWord.Pick(dictionary, suggestions);
-  ui.ShowEndWord(endWord, Score.EndWordBonus);
+  endWord = EndWord.Pick(dictionary, suggestions.Select(s => s.Word));
+  ui.RevealEndWord(endWord, Score.EndWordBonus, suggestions);
 }
 
-ui.ShowMessage($"{(useEndWord ? "The end word is " + endWord!.ToUpperInvariant() + ". " : "")}Draw for first turn: {drawDescription}");
+ui.ShowMessage($"Draw for first turn: {drawDescription}");
 
 int turn = 0;
 int scorelessTurns = 0;

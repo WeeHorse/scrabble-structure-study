@@ -16,8 +16,9 @@ interface IGameUI
   // One player's secret suggestion for the end word; the error (if any) is why the previous attempt was refused.
   string PromptEndWordSuggestion(PlayerView player, IReadOnlyList<Tile> rack, string? error);
 
-  // Shows the end word on the scoreboard from now on (null hides it).
-  void ShowEndWord(string? word, int bonus);
+  // Announces the end word to everybody, with what each player suggested, and keeps it
+  // visible on the scoreboard and the hand-over screens from then on.
+  void RevealEndWord(string word, int bonus, IReadOnlyList<(string Player, string Word)> suggestions);
 
   void ShowScoreboard(IReadOnlyList<PlayerView> players, int tilesInBag);
 

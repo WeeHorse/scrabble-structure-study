@@ -123,7 +123,30 @@ class ConsoleUI : IGameUI, IDisposable
     return word;
   }
 
-  public void ShowEndWord(string? word, int bonus) => (endWord, endWordBonus) = (word, bonus);
+  public void RevealEndWord(string word, int bonus, IReadOnlyList<(string Player, string Word)> suggestions)
+  {
+    (endWord, endWordBonus) = (word, bonus);
+
+    Console.ResetColor();
+    Console.Clear();
+    Console.WriteLine("SCRABBLE - end word");
+    Console.WriteLine();
+    Console.WriteLine("The suggestions were:");
+    foreach (var (player, suggestion) in suggestions)
+      Console.WriteLine($"  {player,-20} {suggestion.ToUpperInvariant()}");
+    Console.WriteLine();
+    Console.Write("The end word is  ");
+    Console.BackgroundColor = ConsoleColor.Yellow;
+    Console.ForegroundColor = ConsoleColor.Black;
+    Console.Write($" {word.ToUpperInvariant()} ");
+    Console.ResetColor();
+    Console.WriteLine();
+    Console.WriteLine();
+    Console.WriteLine($"Whoever plays it gets {bonus} points and ends the game.");
+    Console.WriteLine();
+    Console.WriteLine("Press any key to start the game.");
+    Console.ReadKey(true);
+  }
 
   public IReadOnlyList<string> AskPlayerNames()
   {
@@ -191,6 +214,12 @@ class ConsoleUI : IGameUI, IDisposable
       Console.ForegroundColor = messageIsError ? ConsoleColor.Red : ConsoleColor.Yellow;
       Console.WriteLine(message);
       Console.ResetColor();
+      Console.WriteLine();
+    }
+
+    if (endWord != null)
+    {
+      Console.WriteLine($"End word: {endWord.ToUpperInvariant()} (+{endWordBonus} to whoever plays it, and the game ends)");
       Console.WriteLine();
     }
 
